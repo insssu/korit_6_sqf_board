@@ -1,22 +1,19 @@
-package com.study.SpringSecurityMybatis.entity;
+package com.study.SpringSecurityMybatis.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-// 스키마에 테이블을 만들면 엔터티에 동일한 구조로 만들어 줘야하는 순서
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class Board {
-    private Long id;
+public class RespBoardDetailDto {
+    private Long boardId;
     private String title;
     private String content;
-    private Long userId;
+    private Long writerId;
+    private String writerUsername;
     private int viewCount;
-
-    private User user;
-
 }

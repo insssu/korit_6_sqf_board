@@ -7,6 +7,7 @@ import com.study.SpringSecurityMybatis.service.OAuth2Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -44,7 +45,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.exceptionHandling().authenticationEntryPoint(authenticationHandler);
 
         http.authorizeRequests()
-                .antMatchers("/auth/**", "/h2-console/**")
+                .antMatchers(
+                        "/auth/**",
+                        "/h2-console/**",
+                        "/board/**"
+                )
+                .permitAll()
+                .antMatchers(
+                        HttpMethod.GET,
+                        "/board/**"
+                )
                 .permitAll()
                 .anyRequest()
                 .authenticated();

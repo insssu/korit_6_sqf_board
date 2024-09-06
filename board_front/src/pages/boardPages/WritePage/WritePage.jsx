@@ -9,6 +9,7 @@ import { storage } from '../../../firebase/firebase';
 import { CircleLoader, RingLoader } from "react-spinners";
 import { boardWriteApi } from "../../../apis/boardApi";
 import { instance } from "../../../apis/util/instance";
+import { useNavigate } from "react-router-dom";
 /** @jsxImportSource @emotion/react */
 
 Quill.register("modules/imageResize", ImageResize);
@@ -83,6 +84,7 @@ const loadingLayout = css`
 
 
 function WritePage(props) {
+    const navigate = useNavigate();
     const [ board, setBoard ] = useState({
         title: "",
         content: ""
@@ -91,11 +93,13 @@ function WritePage(props) {
     const quillRef = useRef(null);
     const [ isUploading, setUploading ] = useState(false);
 
-    const handleWriteSubmitOnClick = async () => {
-        instance.post("/board", board)
+    const handleWriteSubmitOnClick = () => {
+        instance.post("/board", board)      // 이녀석이 프로미스 호출
         .then(response => {
             // 응답 데이터는 response.data에 들어있습니다.
             console.log(response.data);
+            alert("작성이 완료되었습니다.");
+            navigate(`/board/detail/${response.data.boardId}`);
             
             // 예: 게시글 ID를 꺼내서 사용
             const boardId = response.data.id;
@@ -118,6 +122,30 @@ function WritePage(props) {
                 }
             }
         });
+    }
+    // promise.then() 을 하자니 코드가 너무 길어지고 우하향 그래프모양으로 코드가 작성되더라. 그래서 async await 을 이용해서 가독성 좋게 바꿔주자
+
+    const handleWriteSubmitOnClick2 = async () => {
+        try {
+            const response = await instance.post("/board", board)  // await 은 async 함수안에 달 수 있고, 호출하는 함수가 promise여야 await을 걸 수 있음
+            alert("작성이 완료되었습니다.");
+            navigate(`/board/detail/${response.data.boardId}`);
+        } catch(error) {
+            console.error('Error submitting board:', error);
+            const fieldErrors = error.response.data;
+            for (let fieldError of fieldErrors) {
+                if (fieldError.field === "title") {
+                    alert(fieldError.defaultMessage);
+                    return;     // alert 하나만 띄우고 싶을 때title이 없다면 이 반복을 빠져나가야 한다는 것을 뜻함. break 가 아닌 return을 써주는 이유
+                }
+            }
+            for (let fieldError of fieldErrors) {
+                if (fieldError.field === "content") {
+                    alert(fieldError.defaultMessage);
+                    return;
+                }
+            }
+        }
     }
 
     const handleTitleInputOnChange = (e) => {

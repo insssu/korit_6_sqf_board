@@ -20,3 +20,6 @@ public class ReqWriteBoardDto {
                 .build();
     }
 }
+
+// 유저 아이디는 로그인된 토큰에서 꺼내와야 한다. 유저 아이디 정보는 contextHolder에 들어있고,
+// authentication
