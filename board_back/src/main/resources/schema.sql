@@ -2,6 +2,7 @@
 --DROP TABLE IF EXISTS ROLE;
 --DROP TABLE IF EXISTS USER_ROLES;
 --DROP TABLE IF EXISTS OAUTH2_USER;
+--DROP TABLE IF EXISTS COMMENT;
 --
 --CREATE TABLE USER (
 --    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -42,10 +43,19 @@
 --    user_id BIGINT not null
 --);
 
-CREATE TABLE BOARD_LIKE (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    board_id BIGINT not null,
-    user_id BIGINT not null
-);
+--CREATE TABLE BOARD_LIKE (
+--    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+--    board_id BIGINT not null,
+--    user_id BIGINT not null
+--);
 
 --ALTER TABLE `BOARD` ADD COLUMN view_count INT NOT NULL DEFAULT 0;
+
+CREATE TABLE COMMENT (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    board_id BIGINT not null,
+    parent_id BIGINT null,
+    content TEXT not null,
+    writer_id BIGINT not null,
+    create_date DATETIME not null
+);

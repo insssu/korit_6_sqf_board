@@ -191,8 +191,12 @@ function WritePage(props) {
                     editor.setSelection(editPoint.index + 1);
                     editor.insertText(editPoint.index + 1, "\n");
                     setUploading(false);
+                    setBoard(board => ({    // 사진을 업로드하고 상태를 한번 바꿔줘야 데이터가 빈값이 아니라고 인식할 수 있음
+                        ...board,
+                        content: editor.root.innerHTML,
+                    }));
                 }
-            )
+            );
         }
     }, []);
 
