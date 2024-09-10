@@ -51,11 +51,18 @@
 
 --ALTER TABLE `BOARD` ADD COLUMN view_count INT NOT NULL DEFAULT 0;
 
-CREATE TABLE COMMENT (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    board_id BIGINT not null,
-    parent_id BIGINT null,
-    content TEXT not null,
-    writer_id BIGINT not null,
-    create_date DATETIME not null
-);
+--CREATE TABLE COMMENT (
+--    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+--    board_id BIGINT not null,
+--    parent_id BIGINT null,
+--    content TEXT not null,
+--    writer_id BIGINT not null,
+--    create_date DATETIME not null
+--);
+
+CREATE TRIGGER before_delete_comment
+BEFORE DELETE ON COMMENT
+FOR EACH ROW
+BEGIN
+    delete from comment where parent_id = old.id
+END;

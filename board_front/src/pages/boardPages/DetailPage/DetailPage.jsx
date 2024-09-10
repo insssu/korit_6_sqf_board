@@ -7,6 +7,7 @@ import { css } from "@emotion/react";
 import { IoMdHeart, IoMdHeartEmpty } from "react-icons/io";
 import { GoHeart } from "react-icons/go";
 import { useState } from "react";
+import { set } from "firebase/database";
 
 const layout = css`
     box-sizing: border-box;
@@ -183,6 +184,7 @@ function DetailPage(props) {
     const navigate = useNavigate();
     const params = useParams();
     const boardId = params.boardId;
+
     const queryClient = useQueryClient();
     const userInfoData = queryClient.getQueryData("userInfoQuery");
 
@@ -193,56 +195,6 @@ function DetailPage(props) {
         content: "",
     });
 
-    const handleReplyButtonOnClick = (commentId) => {
-        setCommentData({
-            boardId: boardId,
-            // = boardId,
-            parentId: null,
-            content: "",
-        })
-        // 답글이 여러개가 있는데, 1번을 눌렀을 때 commentId 가 1로 들어오고, 이 값이 달라야지 
-        setCommentData(commentData => ({   // 답글 버튼 누를 때 마다 이 값이 같이 바뀔 것이다.
-            ...commentData,
-            parentId: commentId === commentData.parentId ? null : commentId,
-        }));
-    }
-
-    const handleCommentInputOnChange = (e) => {
-        setCommentData(commentData => ({   // 답글 버튼 누를 때 마다 이 값이 같이 바뀔 것이다.
-            ...commentData,
-            [e.target.name]: e.target.value
-        }));
-    }
-
-    // Mutation : 작성, 수정, 삭제 할 때 사용
-    const commentMutation = useMutation(
-        async () => {
-            return await instance.post("/board/comment", commentData);
-        },
-        {
-            onSuccess: response => {
-                alert("댓글 작성이 완료되었습니다.");
-                comments.refetch();
-                setCommentData({
-                    boardId: boardId,
-                    // = boardId,
-                    parentId: null,
-                    content: "",
-                })
-            }
-        }
-    );
-
-    const handleCommentSubmitOnClick = () => {
-        if (!userInfoData?.data) {
-            if (window.confirm("로그인 후 이용가능합니다. 로그인 페이지로 이동하시겠습니까?")) {
-                navigate("/user/login");
-            }
-            return;
-        }
-        commentMutation.mutateAsync();
-    }
-    
     const board = useQuery(
         ["boardQuery", boardId], 
         async () => {
@@ -262,6 +214,17 @@ function DetailPage(props) {
         {
             refetchOnWindowFocus: false,
             retry: 0,
+        }
+    );
+
+    const comments = useQuery(
+        ["commentsQuery"],
+        async () => {
+            return await instance.get(`/board/${boardId}/comments`);
+        },
+        {
+            retry: 0,
+            onSuccess: response => console.log(response)
         }
     );
 
@@ -287,16 +250,51 @@ function DetailPage(props) {
         }
     );
 
-    const comments = useQuery(
-        ["commentsQuery"],
+    // reactQuery 에는 useQuery, Mutation 두가지가 있다.
+    // useQuery : get 요청 할 때,
+    // Mutation : 작성(post), 수정(put), 삭제(delete) 할 때 사용
+    const commentMutation = useMutation(
         async () => {
-            return await instance.get(`/board/${boardId}/comment`);
+            return await instance.post("/board/comment", commentData);      // axios 는 객체를 보내주면 자동으로 JSON 으로 자동 형변환 해줌.
         },
         {
-            retry: 0,
-            onSuccess: response => console.log(response)
+            onSuccess: response => {
+                alert("댓글 작성이 완료되었습니다.");
+                setCommentData({
+                    boardId: boardId,
+                    // = boardId,
+                    parentId: null,
+                    content: "",
+                });
+                comments.refetch();
+            }
         }
-    )
+    );
+
+    const modifyCommentMutation = useMutation(
+        async (commentId) => await instance.put(`/board/comment/${commentId}`) ,
+        {
+            onSuccess: response => {
+                alert("수정완료");
+                setCommentData({
+                    boardId,
+                    parentId: null,
+                    content: ""
+                })
+                comments.refetch();
+            }
+        }
+    );
+
+    const deleteCommentMutation = useMutation(
+        async (commentId) => await instance.delete(`/board/comment/${commentId}`),
+        {
+            onSuccess: response => {
+                alert("댓글을 삭제하였습니다.");
+                comments.refetch();
+            }
+        }
+    );
 
     const handleLikeOnClick = () => {
         if (!userInfoData?.data) {
@@ -312,6 +310,40 @@ function DetailPage(props) {
     const handleDislikeOnClick = () => {
         dislikeMutation.mutateAsync();
     };
+
+    const handleCommentInputOnChange = (e) => {
+        setCommentData(commentData => ({   // 답글 버튼 누를 때 마다 이 값이 같이 바뀔 것이다.
+            ...commentData,
+            [e.target.name]: e.target.value
+        }));
+    };
+
+    const handleCommentSubmitOnClick = () => {
+        if (!userInfoData?.data) {      // 403 에러. 토큰이 없기 때문에 나는 에러
+            if (window.confirm("로그인 후 이용가능합니다. 로그인 페이지로 이동하시겠습니까?")) {
+                navigate("/user/login");
+            }
+            return;
+        }
+        commentMutation.mutateAsync();      // 리턴타입이 promise => 비동기로 동작한다.
+    };
+
+    const handleReplyButtonOnClick = (commentId) => {
+        setCommentData(commentData => ({
+            boardId: boardId,
+            // = boardId,
+            parentId: commentId === commentData.parentId ? null : commentId,
+            content: "",
+        }));
+    };
+
+    const handleModifyCommentButtonOnClick = (commentId) => {
+        modifyCommentMutation.mutateAsync(commentId);
+    }
+
+    const handleDeleteCommentButtonOnClick = (commentId) => {
+        deleteCommentMutation.mutateAsync(commentId);
+    }
 
     return (
         <div css={layout}>
@@ -382,7 +414,8 @@ function DetailPage(props) {
                         <div>
                             {
                                 comments?.data?.data.comments.map(comment => 
-                                    <>
+                                    // 댓글 한줄에 대한 id
+                                    <div key={comment.id}>     
                                         <div css={commentListContainer(comment.level)}>
                                             <div>
                                                 <img src={comment.img} alt="" />
@@ -390,7 +423,7 @@ function DetailPage(props) {
                                             <div css={commentDetail}>
                                                 <div css={detailHeader}>
                                                     <span>{comment.username}</span>
-                                                    <span>{comment.createDate}</span>
+                                                    <span>{new Date(comment.createDate).toLocaleString()}</span>
                                                 </div>
                                                 <pre css={detailContent}>{comment.content}</pre>
                                                 <div css={detailButtons}>
@@ -398,12 +431,15 @@ function DetailPage(props) {
                                                         userInfoData?.data?.userId === comment.writerId &&
                                                         <div>
                                                             <button>수정</button>
-                                                            <button>삭제</button>
+                                                            <button onClick={() => handleDeleteCommentButtonOnClick(comment.id)}>삭제</button>
                                                         </div>
                                                     }
-                                                    <div>
-                                                        <button onClick={() => handleReplyButtonOnClick(comment.id)}>답글</button>
-                                                    </div>
+                                                    {
+                                                        comment.level < 3 &&
+                                                        <div>
+                                                            <button onClick={() => handleReplyButtonOnClick(comment.id)}>답글</button>
+                                                        </div>
+                                                    }
                                                 </div>
                                             </div>
                                         </div>
@@ -414,7 +450,7 @@ function DetailPage(props) {
                                                 <button onClick={handleCommentSubmitOnClick}>작성하기</button>
                                             </div>
                                         }
-                                    </>
+                                    </div>
                                 )
                             }
                         </div>

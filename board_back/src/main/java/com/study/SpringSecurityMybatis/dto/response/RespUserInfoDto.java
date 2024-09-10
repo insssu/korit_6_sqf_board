@@ -8,7 +8,7 @@ import java.util.Set;
 @Data
 @Builder
 public class RespUserInfoDto {
-    private Long userid;
+    private Long userId;
     private String username;
     private String name;
     private String email;

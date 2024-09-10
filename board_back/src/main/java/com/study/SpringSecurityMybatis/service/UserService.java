@@ -136,7 +136,7 @@ public class UserService {
         ).collect(Collectors.toSet());
 
         return RespUserInfoDto.builder()
-                .userid(user.getId())
+                .userId(user.getId())
                 .username(user.getUsername())
                 .name(user.getName())
                 .email(user.getEmail())

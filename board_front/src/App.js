@@ -82,9 +82,9 @@ function App() {
         {
             enabled: accessTokenValid.isSuccess && accessTokenValid.data?.data,  // data?.data : axios의 데이터가 존재하면(첫번째 data?.) 참조(두번째 data)
             refetchOnWindowFocus: false,
-            // onSuccess: response => {
-            //     console.log(response);
-            // }
+            onSuccess: response => {
+                console.log(response);
+            }
         }
     );
 
