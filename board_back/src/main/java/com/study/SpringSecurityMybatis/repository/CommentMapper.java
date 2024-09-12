@@ -13,6 +13,7 @@ public interface CommentMapper {
     int deleteById(Long id);
     Comment findById(Long id);
     Comment findByParentId(Long parentId);
+    int modifyById(Comment comment);
 }
 
 // repository 는 데이터베이스와 요청 응답 하는 곳

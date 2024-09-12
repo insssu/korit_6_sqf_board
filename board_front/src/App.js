@@ -12,6 +12,7 @@ import OAuth2JoinPage from './pages/OAuth2JoinPage/OAuth2JoinPage';
 import OAuth2LoginPage from './pages/OAuth2LoginPage/OAuth2LoginPage';
 import WritePage from './pages/boardPages/WritePage/WritePage';
 import DetailPage from './pages/boardPages/DetailPage/DetailPage';
+import NumberBoardListPage from './pages/boardPages/NumberBoardListPage/NumberBoardListPage';
 
 function App() {
      
@@ -88,19 +89,19 @@ function App() {
         }
     );
 
-    console.log(accessTokenValid);
+    // console.log(accessTokenValid);
 
     // console.log("그냥 출력")
     // console.log(accessTokenValid.data);
     // console.log("--------------")
-    console.log(accessTokenValid.status);
+    // console.log(accessTokenValid.status);
 
     useEffect(() => {
         // const accessToken = localStorage.getItem("accessToken");
         // if (!!accessToken) {    // accessToken 이 쓸 수 있는 것인가를 확인해야 한다.
         //     setRefresh(true);
         // }
-        console.log("useEffect 동작");
+        // console.log("useEffect 동작");
     }, [accessTokenValid.data])
 
     return (
@@ -112,7 +113,8 @@ function App() {
             <Route path="/user/login/oauth2" element={ <OAuth2LoginPage /> }/>
             <Route path="/profile" element={ <UserProfilePage /> }/>
 
-            <Route path="/board" element={ <></> } />
+            <Route path="/board/number" element={ <NumberBoardListPage /> } />
+            <Route path="/board/scroll" element={ <></> } />
             <Route path="/board/detail/:boardId" element={ <DetailPage /> } />
             <Route path="/board/write" element={ <WritePage /> } />
 

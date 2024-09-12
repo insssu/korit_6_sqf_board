@@ -1,5 +1,6 @@
 package com.study.SpringSecurityMybatis.controller;
 
+import com.study.SpringSecurityMybatis.dto.request.ReqModifyCommentDto;
 import com.study.SpringSecurityMybatis.dto.request.ReqWriteCommentDto;
 import com.study.SpringSecurityMybatis.service.CommentService;
 import org.apache.ibatis.annotations.Update;
@@ -26,14 +27,18 @@ public class CommentController {
         return ResponseEntity.ok().body(commentService.getComments(boardId));
     }
 
+    // 댓글 수정
+    @PutMapping("/board/comment/{commentId}")
+    public ResponseEntity<?> modifyComment(@RequestBody ReqModifyCommentDto dto) {
+        commentService.modifyComment(dto);
+        return ResponseEntity.ok().body(null);
+    }
+
+    // 댓글 삭제
     @DeleteMapping("/board/comment/{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable Long commentId) {
         commentService.deleteComment(commentId);
         return ResponseEntity.ok().body(true);
     }
 
-    @PutMapping("/board/comment/{commentid}")
-    public ResponseEntity<?> updateComment(@RequestBody ReqWriteCommentDto dto) {
-        return ResponseEntity.ok().body(null);
-    }
 }

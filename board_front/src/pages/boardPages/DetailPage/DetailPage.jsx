@@ -195,6 +195,12 @@ function DetailPage(props) {
         content: "",
     });
 
+    // 댓글 수정
+    const [ commentModifyData, setCommentModifyData ] = useState({
+        commentId: 0,
+        content: "",
+    });
+
     const board = useQuery(
         ["boardQuery", boardId], 
         async () => {
@@ -272,14 +278,13 @@ function DetailPage(props) {
     );
 
     const modifyCommentMutation = useMutation(
-        async (commentId) => await instance.put(`/board/comment/${commentId}`) ,
+        async () => await instance.put(`/board/comment/${commentModifyData.commentId}`, commentModifyData),
         {
-            onSuccess: response => {
+            onSuccess: () => {      // onSuccess 에서 response 를 받아올 때, () 를 받아올때의 차이점?
                 alert("수정완료");
-                setCommentData({
-                    boardId,
-                    parentId: null,
-                    content: ""
+                setCommentModifyData({
+                    commentId: 0,
+                    content: "" 
                 })
                 comments.refetch();
             }
@@ -318,6 +323,13 @@ function DetailPage(props) {
         }));
     };
 
+    const handleCommentModifyInputOnChange = (e) => {
+        setCommentModifyData(commentData => ({   
+            ...commentData,
+            [e.target.name]: e.target.value
+        }));
+    };
+
     const handleCommentSubmitOnClick = () => {
         if (!userInfoData?.data) {      // 403 에러. 토큰이 없기 때문에 나는 에러
             if (window.confirm("로그인 후 이용가능합니다. 로그인 페이지로 이동하시겠습니까?")) {
@@ -328,6 +340,10 @@ function DetailPage(props) {
         commentMutation.mutateAsync();      // 리턴타입이 promise => 비동기로 동작한다.
     };
 
+    const handleCommentModifySubmitOnClick = () => {
+        modifyCommentMutation.mutateAsync();
+    }
+
     const handleReplyButtonOnClick = (commentId) => {
         setCommentData(commentData => ({
             boardId: boardId,
@@ -337,13 +353,24 @@ function DetailPage(props) {
         }));
     };
 
-    const handleModifyCommentButtonOnClick = (commentId) => {
-        modifyCommentMutation.mutateAsync(commentId);
+    // 수정을 누른 댓글의 Id 가 매개변수로 들어올 것.
+    const handleModifyCommentButtonOnClick = (commentId, content) => {
+        setCommentModifyData(commentData => ({
+            commentId,
+            content
+        }))
+    };
+
+    const handleModifyCommnetCancleButtonOnClick = () => {
+        setCommentModifyData(commentData => ({
+            commentId: 0,
+            content: "",
+        }))
     }
 
     const handleDeleteCommentButtonOnClick = (commentId) => {
         deleteCommentMutation.mutateAsync(commentId);
-    }
+    };
 
     return (
         <div css={layout}>
@@ -388,7 +415,7 @@ function DetailPage(props) {
                             </div>
                             <div>
                                 {
-                                    board.data.data.writer === userInfoData?.data.userId &&
+                                    board.data.data.writerId === userInfoData?.data.userId &&
                                     <>
                                         <button>수정</button>
                                         <button>삭제</button>
@@ -430,7 +457,14 @@ function DetailPage(props) {
                                                     {
                                                         userInfoData?.data?.userId === comment.writerId &&
                                                         <div>
-                                                            <button>수정</button>
+                                                            {
+                                                                commentModifyData.commentId === comment.id
+                                                                ?
+                                                                <button onClick={handleModifyCommnetCancleButtonOnClick}>취소</button>
+                                                                :
+                                                                <button onClick={() => handleModifyCommentButtonOnClick(comment.id, comment.content)}>수정</button>
+                                                                // 수정버튼을 눌렀을 때, 각각의 comment.id 가 매개변수로 넘어가야 하므로 함수형태로 받아와야 한다.
+                                                            }
                                                             <button onClick={() => handleDeleteCommentButtonOnClick(comment.id)}>삭제</button>
                                                         </div>
                                                     }
@@ -448,6 +482,13 @@ function DetailPage(props) {
                                             <div css={commentWriteBox(comment.level)}>
                                                 <textarea name="content" onChange={handleCommentInputOnChange} value={commentData.content} placeholder="답글을 입력하세요." ></textarea>
                                                 <button onClick={handleCommentSubmitOnClick}>작성하기</button>
+                                            </div>
+                                        }
+                                        {
+                                            commentModifyData.commentId === comment.id &&
+                                            <div css={commentWriteBox(comment.level)}>
+                                                <textarea name="content" onChange={handleCommentModifyInputOnChange} value={commentModifyData.content} placeholder="답글을 입력하세요." ></textarea>
+                                                <button onClick={handleCommentModifySubmitOnClick}>수정하기</button>
                                             </div>
                                         }
                                     </div>

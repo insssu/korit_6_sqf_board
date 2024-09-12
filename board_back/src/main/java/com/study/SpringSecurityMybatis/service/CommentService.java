@@ -1,5 +1,6 @@
 package com.study.SpringSecurityMybatis.service;
 
+import com.study.SpringSecurityMybatis.dto.request.ReqModifyCommentDto;
 import com.study.SpringSecurityMybatis.dto.request.ReqWriteCommentDto;
 import com.study.SpringSecurityMybatis.dto.response.RespCommentDto;
 import com.study.SpringSecurityMybatis.entity.Comment;
@@ -9,9 +10,6 @@ import com.study.SpringSecurityMybatis.security.principal.PrincipalUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class CommentService {
@@ -29,14 +27,23 @@ public class CommentService {
     }
 
     public RespCommentDto getComments(Long boardId) {
-        System.out.println("commentMapper.findAllByBoardId(boardId) :" + commentMapper.findAllByBoardId(boardId));
         return RespCommentDto.builder()
                 .comments(commentMapper.findAllByBoardId(boardId))
                 .commentCount(commentMapper.getCommentCountByBoardId(boardId))
                 .build();
     }
 
+    public void modifyComment(ReqModifyCommentDto dto) {
+        accessCheck(dto.getCommentId());
+        commentMapper.modifyById(dto.toEntity());
+    }
+
     public void deleteComment(Long commentId) {
+        accessCheck(commentId);
+        commentMapper.deleteById(commentId);
+    }
+
+    private void accessCheck(Long commentId) {
         PrincipalUser principalUser = (PrincipalUser) SecurityContextHolder
                 .getContext()
                 .getAuthentication()
@@ -45,8 +52,7 @@ public class CommentService {
         if (principalUser.getId() != comment.getWriterId()) {
             throw new AccessDeniedException();
         }
-
-        commentMapper.deleteById(commentId);
     }
-
 }
+
+

@@ -1,10 +1,13 @@
 package com.study.SpringSecurityMybatis.service;
 
+import com.study.SpringSecurityMybatis.dto.request.ReqBoardListDto;
 import com.study.SpringSecurityMybatis.dto.request.ReqWriteBoardDto;
 import com.study.SpringSecurityMybatis.dto.response.RespBoardDetailDto;
 import com.study.SpringSecurityMybatis.dto.response.RespBoardLikeInfoDto;
+import com.study.SpringSecurityMybatis.dto.response.RespBoardListDto;
 import com.study.SpringSecurityMybatis.entity.Board;
 import com.study.SpringSecurityMybatis.entity.BoardLike;
+import com.study.SpringSecurityMybatis.entity.BoardList;
 import com.study.SpringSecurityMybatis.exception.NotFoundBoardException;
 import com.study.SpringSecurityMybatis.repository.BoardLikeMapper;
 import com.study.SpringSecurityMybatis.repository.BoardMapper;
@@ -14,6 +17,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class BoardService {
@@ -40,6 +45,17 @@ public class BoardService {
 // PrincipalUser principalUser = (PrincipalUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal()
 // Board board = dto.toEntity()
 // board.setId(principalUser.getId()) => Board board = dto.toEntity(principalUser.getId());
+
+    public RespBoardListDto getBoardList(ReqBoardListDto dto) {
+        Long startIndex = (dto.getPage() - 1) * dto.getLimit();
+        List<BoardList> boardLists = boardMapper.findAllByStartIndexAndLimit(startIndex, dto.getLimit());
+        Integer boardTotalCount = boardMapper.getCountAll();
+
+        return RespBoardListDto.builder()
+                .boards(boardLists)
+                .totalCount(boardTotalCount)
+                .build();
+    }
 
     public RespBoardDetailDto getBoardDetail(Long boardId) {
         Board board = boardMapper.findByBoardId(boardId);
