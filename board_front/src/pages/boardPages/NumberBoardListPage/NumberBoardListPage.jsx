@@ -41,27 +41,27 @@ const paginateContainer = css`
 `;
 
 function NumberBoardListPage(props) {
-    const [ searchParams, setSearchParams ] = useSearchParams();
+    const [ searchParams, setSearchParams ] = useSearchParams();    // 주소 : 포트/페이지URL?key=value(쿼리스트링, 파람스)
     const [ totalPageCount, setTotalPageCount ] = useState(1);
     const navigate = useNavigate();
     const limit = 10;
 
     const boardList = useQuery(
-        ["boardListQuery", searchParams.get("page")],
-        async () => await instance.get(`/board/list?page=${searchParams.get("page")}&limit=${limit}`),
+        ["boardListQuery", searchParams.get("page")],   // searchParams.get("page") 이 바뀔 때 마다 boardListQuery를 다시 실행하겠다. 
+        async () => await instance.get(`/board/list?page=${searchParams.get("page")}&limit=${limit}`),  // limit 은 한번에 보이는 페이지 수의 제한을 둔 것.
         {
             retry: 0,
             onSuccess: response => {setTotalPageCount(
                 response.data.totalCount % limit === 0 
                 ? response.data.totalCount / limit 
-                : (response.data.totalCount / limit) + 1)
+                : Math.floor(response.data.totalCount / limit) + 1);
                 console.log(response)
             }
         }
     );
 
-    const handlePageOnChange = (event) => {
-        navigate(`/board/number?page=${event.selected + 1}`)
+    const handlePageOnChange = (e) => {
+        navigate(`/board/number?page=${e.selected + 1}`)    // 페이지가 랜더링되는 컴포넌트는 변하지 않고 그 안의 값(QueryString)이 바뀐다. 즉, 화면은 그대로지만 안의 내용이 바뀌는 것.
     };
 
     return (
@@ -100,7 +100,7 @@ function NumberBoardListPage(props) {
                     breakLabel="..."
                     previousLabel={<><IoMdArrowDropleft /></>}
                     nextLabel={<><IoMdArrowDropright /></>}
-                    pageCount={totalPageCount - 1 }
+                    pageCount={totalPageCount}
                     marginPagesDisplayed={2}
                     pageRangeDisplayed={3}
                     activeClassName='active'

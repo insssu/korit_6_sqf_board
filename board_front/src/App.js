@@ -13,6 +13,7 @@ import OAuth2LoginPage from './pages/OAuth2LoginPage/OAuth2LoginPage';
 import WritePage from './pages/boardPages/WritePage/WritePage';
 import DetailPage from './pages/boardPages/DetailPage/DetailPage';
 import NumberBoardListPage from './pages/boardPages/NumberBoardListPage/NumberBoardListPage';
+import ScrollBoardListPage from './pages/boardPages/ScrollBoardListPage/ScrollBoardListPage';
 
 function App() {
      
@@ -83,9 +84,9 @@ function App() {
         {
             enabled: accessTokenValid.isSuccess && accessTokenValid.data?.data,  // data?.data : axios의 데이터가 존재하면(첫번째 data?.) 참조(두번째 data)
             refetchOnWindowFocus: false,
-            onSuccess: response => {
-                console.log(response);
-            }
+            // onSuccess: response => {
+            //     console.log(response);
+            // }
         }
     );
 
@@ -114,7 +115,7 @@ function App() {
             <Route path="/profile" element={ <UserProfilePage /> }/>
 
             <Route path="/board/number" element={ <NumberBoardListPage /> } />
-            <Route path="/board/scroll" element={ <></> } />
+            <Route path="/board/scroll" element={ <ScrollBoardListPage /> } />
             <Route path="/board/detail/:boardId" element={ <DetailPage /> } />
             <Route path="/board/write" element={ <WritePage /> } />
 

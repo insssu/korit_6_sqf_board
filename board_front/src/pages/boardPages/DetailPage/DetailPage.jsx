@@ -182,7 +182,10 @@ const detailButtons = css`
 
 function DetailPage(props) {
     const navigate = useNavigate();
-    const params = useParams();
+    const params = useParams();         // useParams와 useSearchParams 의 차이는 ? 물음표를 기준으로 왼쪽이 Params, 오른쪽이 SearchParams
+    // useParams는 App.js에서 :boardId 처럼 : 콜론을 사용해준다. 
+    // 기준은, 만약 페이지 번호나 보드 번호는 주로 Params 를 많이 쓴다.
+    // 옵션의 값이다 라고 하면 QueryString으로 작성
     const boardId = params.boardId;
 
     const queryClient = useQueryClient();

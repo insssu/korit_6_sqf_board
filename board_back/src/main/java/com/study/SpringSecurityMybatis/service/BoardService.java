@@ -47,6 +47,7 @@ public class BoardService {
 // board.setId(principalUser.getId()) => Board board = dto.toEntity(principalUser.getId());
 
     public RespBoardListDto getBoardList(ReqBoardListDto dto) {
+        // startIndex 의 갯수를 지정해준 것 ( x - 1 ) * limit 갯수
         Long startIndex = (dto.getPage() - 1) * dto.getLimit();
         List<BoardList> boardLists = boardMapper.findAllByStartIndexAndLimit(startIndex, dto.getLimit());
         Integer boardTotalCount = boardMapper.getCountAll();
