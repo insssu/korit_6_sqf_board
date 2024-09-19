@@ -2,6 +2,7 @@ package com.study.SpringSecurityMybatis.controller;
 
 import com.study.SpringSecurityMybatis.aspect.annotation.ValidAop;
 import com.study.SpringSecurityMybatis.dto.request.ReqBoardListDto;
+import com.study.SpringSecurityMybatis.dto.request.ReqSearchBoardDto;
 import com.study.SpringSecurityMybatis.dto.request.ReqWriteBoardDto;
 import com.study.SpringSecurityMybatis.service.BoardService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +27,13 @@ public class BoardController {
         return ResponseEntity.ok().body(Map.of("boardId", boardService.writeBoard(dto)));
     }
 
+    @GetMapping("/board/search")
+    public ResponseEntity<?> getSearchBoards(ReqSearchBoardDto dto) {
+        return ResponseEntity.ok().body(boardService.getSearchBoard(dto));
+    }
+
     @GetMapping("/board/list")
     public ResponseEntity<?> getBoards(ReqBoardListDto dto) {
-        System.out.println(dto);
         return ResponseEntity.ok().body(boardService.getBoardList(dto));
     }
 

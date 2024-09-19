@@ -1,6 +1,7 @@
 package com.study.SpringSecurityMybatis.service;
 
 import com.study.SpringSecurityMybatis.dto.request.ReqBoardListDto;
+import com.study.SpringSecurityMybatis.dto.request.ReqSearchBoardDto;
 import com.study.SpringSecurityMybatis.dto.request.ReqWriteBoardDto;
 import com.study.SpringSecurityMybatis.dto.response.RespBoardDetailDto;
 import com.study.SpringSecurityMybatis.dto.response.RespBoardLikeInfoDto;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class BoardService {
@@ -45,6 +47,26 @@ public class BoardService {
 // PrincipalUser principalUser = (PrincipalUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal()
 // Board board = dto.toEntity()
 // board.setId(principalUser.getId()) => Board board = dto.toEntity(principalUser.getId());
+
+    // key, value 형태의 객체를 만들어서 요청을 보내는 것
+    public RespBoardListDto getSearchBoard(ReqSearchBoardDto dto) {
+        Long startIndex = (dto.getPage() - 1) * dto.getLimit();
+        Map<String, Object> params = Map.of(
+                "startIndex", startIndex,
+                "limit", dto.getLimit(),
+                "searchValue", dto.getSearch() == null ? "" : dto.getSearch(),
+                "option", dto.getOption() == null || dto.getOption().isBlank() ? "all" : dto.getOption()
+                // 프론트에서 null 값을 처리해줬다고 해서 back에서 null처리를 안해줘도 되는것은 아님. 예를들어 postman 에서 직접적으로 null을 보내줄 경우도 있기 때문에
+        );
+
+        List<BoardList> boardLists = boardMapper.findAllBySearch(params);
+        Integer boardTotalCount = boardMapper.getCountAllBySearch(params);
+
+        return RespBoardListDto.builder()
+                .boards(boardLists)
+                .totalCount(boardTotalCount)
+                .build();
+    }
 
     public RespBoardListDto getBoardList(ReqBoardListDto dto) {
         // startIndex 의 갯수를 지정해준 것 ( x - 1 ) * limit 갯수
